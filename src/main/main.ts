@@ -13,7 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { resolveHtmlPath, saveImage } from './util';
 
 class AppUpdater {
   constructor() {
@@ -25,10 +25,8 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+ipcMain.on('image-save', (event, args) =>{
+  saveImage(args[0], args[1])
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -75,6 +73,7 @@ const createWindow = async () => {
     height: 1020,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      nodeIntegration: true,
       sandbox: false,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
